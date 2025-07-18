@@ -2,7 +2,6 @@
 const API_KEY = 'd6b4596de6c29587705b230c6b3f1a64';
 const BASE_URL = 'https://api.themoviedb.org/3';
 
-// === Global Variables ===
 let currentView = 'grid';
 
 $(document).ready(function () {
@@ -13,7 +12,7 @@ $(document).ready(function () {
   $('#nav-home').click(loadPopularMovies);
 
   $('#nav-search').click(function () {
-    // Render Search UI
+    // Search section UI setup
     $('#app').html(`
       <h2>Search Movies</h2>
       <input type="text" id="search-input" placeholder="Enter movie title">
@@ -25,7 +24,7 @@ $(document).ready(function () {
       <div id="search-results" class="movie-container ${currentView}"></div>
     `);
 
-    // Search Handler
+    // Trigger search
     $('#search-btn').click(function () {
       const query = $('#search-input').val();
       searchMovies(query);
@@ -43,7 +42,51 @@ $(document).ready(function () {
     $('.movie-container').removeClass('grid').addClass('list');
   });
 
-  // === Utility Function to Apply View Class ===
+  // === Favorites Navigation ===
+  $('#nav-favorites').click(function () {
+    const favs = JSON.parse(localStorage.getItem('favorites')) || [];
+    let html = '<h2>Your Favorite Movies</h2>';
+    if (favs.length === 0) {
+      html += '<p>No favorites yet.</p>';
+    } else {
+      html += `<div class="movie-container ${currentView}">`;
+      favs.forEach(movie => {
+        html += `
+          <div class="movie-card">
+            <h3>${movie.title}</h3>
+            <img src="https://image.tmdb.org/t/p/w200${movie.poster}" alt="${movie.title}">
+            <button class="btn remove-fav" data-id="${movie.id}">Remove from Favorites</button>
+          </div>
+        `;
+      });
+      html += '</div>';
+    }
+    $('#app').html(html);
+  });
+
+  // === Watchlist Navigation ===
+  $('#nav-watchlist').click(function () {
+    const list = JSON.parse(localStorage.getItem('watchlist')) || [];
+    let html = '<h2>Your Watchlist</h2>';
+    if (list.length === 0) {
+      html += '<p>No movies in your watchlist yet.</p>';
+    } else {
+      html += `<div class="movie-container ${currentView}">`;
+      list.forEach(movie => {
+        html += `
+          <div class="movie-card">
+            <h3>${movie.title}</h3>
+            <img src="https://image.tmdb.org/t/p/w200${movie.poster}" alt="${movie.title}">
+            <button class="btn remove-watch" data-id="${movie.id}">Remove from Watchlist</button>
+          </div>
+        `;
+      });
+      html += '</div>';
+    }
+    $('#app').html(html);
+  });
+
+  // === Utility: Return container class ===
   function applyViewClass() {
     return `movie-container ${currentView}`;
   }
@@ -71,7 +114,16 @@ $(document).ready(function () {
       let html = '<h2>Popular Movies</h2>' + description;
       html += `<div class="${applyViewClass()}">`;
       data.results.forEach(movie => {
-        html += renderMovieCard(movie);
+        html += `
+          <div class="movie-card" data-id="${movie.id}">
+            <h3>${movie.title}</h3>
+            <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}">
+            <p>${movie.overview}</p>
+            <button class="btn add-fav" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Favorites</button>
+            <button class="btn add-watch" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Watchlist</button>
+            <button class="btn view-details" data-id="${movie.id}">View Details</button>
+          </div>
+        `;
       });
       html += '</div>';
       $('#app').html(html);
@@ -83,24 +135,19 @@ $(document).ready(function () {
     $.get(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`, function (data) {
       let html = '';
       data.results.forEach(movie => {
-        html += renderMovieCard(movie);
+        html += `
+          <div class="movie-card" data-id="${movie.id}">
+            <h3>${movie.title}</h3>
+            <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}">
+            <p>${movie.overview}</p>
+            <button class="btn add-fav" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Favorites</button>
+            <button class="btn add-watch" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Watchlist</button>
+            <button class="btn view-details" data-id="${movie.id}">View Details</button>
+          </div>
+        `;
       });
       $('#search-results').html(`<div class="${applyViewClass()}">${html}</div>`);
     });
-  }
-
-  // === Render Movie Card ===
-  function renderMovieCard(movie) {
-    return `
-      <div class="movie-card" data-id="${movie.id}">
-        <h3>${movie.title}</h3>
-        <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}">
-        <p>${movie.overview}</p>
-        <button class="btn add-fav" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Favorites</button>
-        <button class="btn add-watch" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Watchlist</button>
-        <button class="btn view-details" data-id="${movie.id}">View Details</button>
-      </div>
-    `;
   }
 
   // === Add to Favorites ===
@@ -118,6 +165,15 @@ $(document).ready(function () {
     }
   });
 
+  // === Remove from Favorites ===
+  $(document).on('click', '.remove-fav', function () {
+    const id = $(this).data('id');
+    let favs = JSON.parse(localStorage.getItem('favorites')) || [];
+    favs = favs.filter(m => m.id !== id);
+    localStorage.setItem('favorites', JSON.stringify(favs));
+    $('#nav-favorites').click();
+  });
+
   // === Add to Watchlist ===
   $(document).on('click', '.add-watch', function () {
     const movie = {
@@ -133,7 +189,16 @@ $(document).ready(function () {
     }
   });
 
-  // === View Movie Details ===
+  // === Remove from Watchlist ===
+  $(document).on('click', '.remove-watch', function () {
+    const id = $(this).data('id');
+    let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+    watchlist = watchlist.filter(m => m.id !== id);
+    localStorage.setItem('watchlist', JSON.stringify(watchlist));
+    $('#nav-watchlist').click();
+  });
+
+  // === View Movie Details: Cast and Reviews ===
   $(document).on('click', '.view-details', function () {
     const movieId = $(this).data('id');
     $.get(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&append_to_response=credits,reviews`, function (movie) {
