@@ -1,5 +1,5 @@
 // Replace with your actual TMDb API key
-const API_KEY = 'YOUR_API_KEY_HERE';
+const API_KEY = 'd6b4596de6c29587705b230c6b3f1a64';
 const BASE_URL = 'https://api.themoviedb.org/3';
 
 $(document).ready(function () {
@@ -60,3 +60,4 @@ $(document).ready(function () {
     });
   }
 });
+
