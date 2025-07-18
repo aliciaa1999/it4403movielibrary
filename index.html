@@ -7,6 +7,7 @@
   <!-- jQuery CDN -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <style>
+    /* Global Styling */
     body {
       margin: 0;
       padding: 0;
@@ -14,6 +15,8 @@
       background-color: #000;
       color: #fff;
     }
+
+    /* Header Styling */
     header {
       background-color: #b30000;
       padding: 15px;
@@ -23,6 +26,8 @@
       margin: 0;
       color: #fff;
     }
+
+    /* Navigation Bar Styling */
     nav {
       display: flex;
       justify-content: center;
@@ -38,6 +43,8 @@
     nav a:hover {
       color: #b30000;
     }
+
+    /* Container and Card Layout */
     .container {
       padding: 20px;
     }
@@ -51,6 +58,8 @@
     .movie-card img {
       max-width: 100%;
     }
+
+    /* Button Styling */
     .btn {
       background-color: #b30000;
       border: none;
@@ -58,6 +67,8 @@
       color: #fff;
       cursor: pointer;
       border-radius: 4px;
+      margin-top: 10px;
+      margin-right: 5px;
     }
     .btn:hover {
       background-color: #cc0000;
@@ -65,31 +76,41 @@
   </style>
 </head>
 <body>
+  <!-- Header -->
   <header>
     <h1>Movie Explorer</h1>
   </header>
+
+  <!-- Navigation Menu -->
   <nav>
     <a href="#" id="nav-home">Home</a>
     <a href="#" id="nav-search">Search</a>
     <a href="#" id="nav-favorites">Favorites</a>
     <a href="#" id="nav-watchlist">Watchlist</a>
   </nav>
+
+  <!-- Main Content Container -->
   <div class="container" id="app">
     <!-- Dynamic content will load here -->
   </div>
 
+  <!-- JavaScript Logic -->
   <script>
+    // API configuration
     const API_KEY = 'd6b4596de6c29587705b230c6b3f1a64';
     const BASE_URL = 'https://api.themoviedb.org/3';
 
+    // Document ready event
     $(document).ready(function () {
-      // Load Home by default
+      // Load homepage by default
       loadPopularMovies();
 
+      // Navigation: Home
       $('#nav-home').click(function () {
         loadPopularMovies();
       });
 
+      // Navigation: Search
       $('#nav-search').click(function () {
         $('#app').html(`
           <h2>Search Movies</h2>
@@ -104,15 +125,71 @@
         });
       });
 
+      // Navigation: Favorites
+      $('#nav-favorites').click(function () {
+        const favs = JSON.parse(localStorage.getItem('favorites')) || [];
+        let html = '<h2>Your Favorite Movies</h2>';
+        if (favs.length === 0) {
+          html += '<p>No favorites yet.</p>';
+        } else {
+          favs.forEach(movie => {
+            html += `
+              <div class="movie-card">
+                <h3>${movie.title}</h3>
+                <img src="https://image.tmdb.org/t/p/w200${movie.poster}" alt="${movie.title}">
+                <button class="btn remove-fav" data-id="${movie.id}">Remove</button>
+              </div>
+            `;
+          });
+        }
+        $('#app').html(html);
+      });
+
+      // Navigation: Watchlist
+      $('#nav-watchlist').click(function () {
+        const list = JSON.parse(localStorage.getItem('watchlist')) || [];
+        let html = '<h2>Your Watchlist</h2>';
+        if (list.length === 0) {
+          html += '<p>No movies in your watchlist yet.</p>';
+        } else {
+          list.forEach(movie => {
+            html += `
+              <div class="movie-card">
+                <h3>${movie.title}</h3>
+                <img src="https://image.tmdb.org/t/p/w200${movie.poster}" alt="${movie.title}">
+                <button class="btn remove-watch" data-id="${movie.id}">Remove</button>
+              </div>
+            `;
+          });
+        }
+        $('#app').html(html);
+      });
+
+      // Load and display popular movies
       function loadPopularMovies() {
+        const description = `
+          <div id="home-description">
+            <p>Welcome to <strong>Movie Explorer</strong>! This single-page application allows you to browse, search, and explore movies using The Movie Database (TMDb) API. You can:</p>
+            <ul>
+              <li>📽️ View trending and popular movies</li>
+              <li>🔍 Search for specific movie titles</li>
+              <li>❤️ Save favorites</li>
+              <li>🎬 Build your personal watchlist</li>
+              <li>✨ Explore movie details with poster previews and summaries</li>
+            </ul>
+          </div>
+        `;
+
         $.get(`${BASE_URL}/movie/popular?api_key=${API_KEY}`, function (data) {
-          let html = '<h2>Popular Movies</h2>';
+          let html = '<h2>Popular Movies</h2>' + description;
           data.results.forEach(movie => {
             html += `
               <div class="movie-card">
                 <h3>${movie.title}</h3>
                 <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}">
                 <p>${movie.overview}</p>
+                <button class="btn add-fav" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Favorites</button>
+                <button class="btn add-watch" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Watchlist</button>
               </div>
             `;
           });
@@ -120,6 +197,7 @@
         });
       }
 
+      // Search movies by query
       function searchMovies(query) {
         $.get(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`, function (data) {
           let html = '<h2>Search Results</h2>';
@@ -129,12 +207,62 @@
                 <h3>${movie.title}</h3>
                 <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}">
                 <p>${movie.overview}</p>
+                <button class="btn add-fav" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Favorites</button>
+                <button class="btn add-watch" data-id="${movie.id}" data-title="${movie.title}" data-poster="${movie.poster_path}">Add to Watchlist</button>
               </div>
             `;
           });
           $('#search-results').html(html);
         });
       }
+
+      // Add to Favorites handler
+      $(document).on('click', '.add-fav', function () {
+        const movie = {
+          id: $(this).data('id'),
+          title: $(this).data('title'),
+          poster: $(this).data('poster')
+        };
+        let favs = JSON.parse(localStorage.getItem('favorites')) || [];
+        if (!favs.find(m => m.id === movie.id)) {
+          favs.push(movie);
+          localStorage.setItem('favorites', JSON.stringify(favs));
+          alert('Added to Favorites');
+        }
+      });
+
+      // Add to Watchlist handler
+      $(document).on('click', '.add-watch', function () {
+        const movie = {
+          id: $(this).data('id'),
+          title: $(this).data('title'),
+          poster: $(this).data('poster')
+        };
+        let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+        if (!watchlist.find(m => m.id === movie.id)) {
+          watchlist.push(movie);
+          localStorage.setItem('watchlist', JSON.stringify(watchlist));
+          alert('Added to Watchlist');
+        }
+      });
+
+      // Remove from Favorites handler
+      $(document).on('click', '.remove-fav', function () {
+        const id = $(this).data('id');
+        let favs = JSON.parse(localStorage.getItem('favorites')) || [];
+        favs = favs.filter(movie => movie.id !== id);
+        localStorage.setItem('favorites', JSON.stringify(favs));
+        $('#nav-favorites').trigger('click');
+      });
+
+      // Remove from Watchlist handler
+      $(document).on('click', '.remove-watch', function () {
+        const id = $(this).data('id');
+        let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+        watchlist = watchlist.filter(movie => movie.id !== id);
+        localStorage.setItem('watchlist', JSON.stringify(watchlist));
+        $('#nav-watchlist').trigger('click');
+      });
     });
   </script>
 </body>
