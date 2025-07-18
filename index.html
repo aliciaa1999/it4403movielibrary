@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Movie Explorer</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Library</title>
+  
   <!-- jQuery CDN -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
   <!-- External Script -->
   <script src="script.js" defer></script>
+
+  <!-- Internal CSS Styling -->
   <style>
+    /* === Global Styling === */
     body {
       margin: 0;
       padding: 0;
@@ -17,52 +22,50 @@
       color: #fff;
     }
 
+    /* === Header Styling === */
     header {
       background-color: #b30000;
       padding: 15px;
       text-align: center;
     }
-
     header h1 {
       margin: 0;
       color: #fff;
     }
 
+    /* === Navigation Styling === */
     nav {
       display: flex;
       justify-content: center;
       background-color: #111;
       padding: 10px;
     }
-
     nav a {
       color: #fff;
       text-decoration: none;
       margin: 0 15px;
       font-weight: bold;
     }
-
     nav a:hover {
       color: #b30000;
     }
 
+    /* === Container & Movie Cards === */
     .container {
       padding: 20px;
     }
-
     .movie-card {
       background-color: #111;
       border: 1px solid #b30000;
       padding: 15px;
-      margin: 15px 0;
+      margin: 15px;
       border-radius: 8px;
     }
-
     .movie-card img {
-      max-width: 100px;
-      display: block;
+      max-width: 100%;
     }
 
+    /* === Buttons === */
     .btn {
       background-color: #b30000;
       border: none;
@@ -73,21 +76,19 @@
       margin-top: 10px;
       margin-right: 5px;
     }
-
     .btn:hover {
       background-color: #cc0000;
     }
 
+    /* === Details, Cast, and Reviews === */
     .details-section {
       margin-top: 10px;
     }
-
     .cast-list {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
-
     .cast-item {
       background-color: #222;
       border: 1px solid #444;
@@ -95,7 +96,6 @@
       border-radius: 4px;
       font-size: 0.9em;
     }
-
     .review-item {
       margin-top: 5px;
       border-top: 1px solid #444;
@@ -103,39 +103,52 @@
       font-size: 0.9em;
     }
 
+    /* === Sorting and Filtering Section === */
     .sort-filter {
-      margin: 20px;
+      margin: 10px 0;
       display: flex;
       gap: 10px;
-      align-items: center;
     }
-
     .sort-filter select {
       padding: 5px;
       border-radius: 4px;
       border: 1px solid #ccc;
     }
 
+    /* === Home Description Box === */
     #home-description {
       background-color: #111;
       border-left: 4px solid #b30000;
       padding: 15px;
       margin-bottom: 20px;
     }
-
     #home-description ul {
       margin: 0;
       padding-left: 20px;
     }
+
+    /* === View Toggle Buttons === */
+    .view-toggle {
+      margin-top: 10px;
+    }
+    .grid .movie-card {
+      display: inline-block;
+      width: 30%;
+      vertical-align: top;
+    }
+    .list .movie-card {
+      width: 100%;
+    }
   </style>
 </head>
 <body>
-  <!-- Header -->
+
+  <!-- === Header === -->
   <header>
     <h1>Movie Explorer</h1>
   </header>
 
-  <!-- Navigation -->
+  <!-- === Navigation Bar === -->
   <nav>
     <a href="#" id="nav-home">Home</a>
     <a href="#" id="nav-search">Search</a>
@@ -143,10 +156,26 @@
     <a href="#" id="nav-watchlist">Watchlist</a>
   </nav>
 
-  <!-- Main Content Area -->
-  <div class="container" id="app">
-    <!-- Dynamic content loads here -->
+  <!-- === Sort and Filter Controls === -->
+  <div class="sort-filter" id="sort-filter-bar">
+    <label for="sort-select">Sort By:</label>
+    <select id="sort-select">
+      <option value="popularity.desc">Popularity Descending</option>
+      <option value="popularity.asc">Popularity Ascending</option>
+      <option value="release_date.desc">Release Date Descending</option>
+      <option value="release_date.asc">Release Date Ascending</option>
+      <option value="vote_average.desc">Rating Descending</option>
+      <option value="vote_average.asc">Rating Ascending</option>
+    </select>
+    <button id="apply-sort" class="btn">Apply</button>
   </div>
+
+  <!-- === Main App Content === -->
+  <div class="container" id="app">
+    <!-- Dynamic content will be loaded here via JavaScript -->
+  </div>
+
 </body>
 </html>
+
 
