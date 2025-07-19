@@ -42,6 +42,12 @@ $(document).ready(function () {
     $('.movie-container').removeClass('grid').addClass('list');
   });
 
+    // === Apply Sort Button Handler ===
+  $(document).on('click', '#apply-sort', function () {
+    const sortBy = $('#sort-select').val();
+    loadPopularMovies(sortBy);
+  });
+
   // === Favorites Navigation ===
   $('#nav-favorites').click(function () {
     const favs = JSON.parse(localStorage.getItem('favorites')) || [];
@@ -244,4 +250,5 @@ $(document).ready(function () {
     });
   });
 });
+
 
